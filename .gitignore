@@ -1,0 +1,117 @@
+## Visual Studio & .NET Framework .gitignore
+## Configured for CryptoTrading (.NET Framework 4.7.2 / ASP.NET Web Application)
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# Visual Studio cache and settings directory
+.vs/
+
+# Build results and intermediate output
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+[Ii]ntermediate[Dd]ir/
+
+# Auto-saved and cache files
+*.bak
+*.cache
+
+# NuGet Packages directory (packages are restored via NuGet/MSBuild)
+**/packages/*
+!**/packages/build/
+!**/packages/buildCrossTargeting/
+!**/packages/repositories.config
+!**/packages/packages.config
+*.nupkg
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*.VisualState.xml
+TestResult.xml
+nunit-*.xml
+
+# Code Coverage
+*.coverage
+*.coveragexml
+coverage*.json
+coverage*.xml
+coverage*.info
+*.dotCover
+
+# Files built by Visual Studio / compilers
+*_i.c
+*_p.c
+*_h.h
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.pch
+*.pdb
+*.ipdb
+*.pgc
+*.pgd
+*.rsp
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.vspscc
+*.vssscc
+.builds
+*.pidb
+*.svclog
+*.scc
+
+# Web publishing and deployment files
+*.[Pp]ublish.xml
+*.azurePubxml
+*.pubxml
+*.publishproj
+*.publishsettings
+
+# Local IIS / IIS Express
+aspnet_client/
+[Tt]emp/
+
+# ReSharper / JetBrains Rider / Rider
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+.idea/
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Environment / local secret overrides (optional safety)
+*.env
+*.env.*
+*.local.config
+app.secrets.config
+connectionStrings.config
+
