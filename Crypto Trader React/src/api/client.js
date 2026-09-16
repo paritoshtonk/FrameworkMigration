@@ -66,8 +66,8 @@ export const authStorage = {
     setUser: (user) => localStorage.setItem('crypto_trader_user', JSON.stringify(user)),
     clearUser: () => localStorage.removeItem('crypto_trader_user'),
     logout: () => {
-        localStorage.removeItem('crypto_trader_token');
-        localStorage.removeItem('crypto_trader_user');
+        authStorage.clearToken();
+        authStorage.clearUser();
     },
     isTokenExpired: () => isTokenExpired(authStorage.getToken()),
     onSessionExpired: (listener) => {
