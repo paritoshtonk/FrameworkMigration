@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": ".NET: Attach to Process (IIS Express / .NET)",
+      "type": "clr",
+      "request": "attach",
+      "processId": "${command:pickProcess}"
+    }
+  ]
+}
+

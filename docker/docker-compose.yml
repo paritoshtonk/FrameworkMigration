@@ -1,0 +1,33 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: cryptotrading-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=CryptoTrading!2026Secure
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+      - ../database:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'CryptoTrading!2026Secure' -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pubsub-emulator:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:emulators
+    container_name: cryptotrading-pubsub
+    command: gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
+    ports:
+      - "8085:8085"
+    restart: unless-stopped
+
+volumes:
+  sqlserver-data:
+    driver: local
+
+

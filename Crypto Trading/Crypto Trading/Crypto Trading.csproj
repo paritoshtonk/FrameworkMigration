@@ -1,18 +1,17 @@
-﻿<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="'$(MSBuildRuntimeType)' != 'Core' And Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>
-    </ProductVersion>
+    <ProductVersion></ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{8E776C20-8603-4880-BD99-9219811836A2}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Crypto_Trading</RootNamespace>
-    <AssemblyName>Crypto Trading</AssemblyName>
+    <RootNamespace>CryptoTrading.Web</RootNamespace>
+    <AssemblyName>CryptoTrading.Web</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
@@ -21,8 +20,6 @@
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -44,33 +41,130 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Web.DynamicData" />
-    <Reference Include="System.Web.Entity" />
-    <Reference Include="System.Web.ApplicationServices" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Xml" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Services" />
-    <Reference Include="System.EnterpriseServices" />
-  </ItemGroup>
-  <ItemGroup>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Runtime.Caching" />
+    <!-- NuGet References -->
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Formatting">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.9\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.5.2.9\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.5.2.9\lib\net45\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.Cors">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Cors.5.2.9\lib\net45\System.Web.Http.Cors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Cors">
+      <HintPath>..\packages\Microsoft.AspNet.Cors.5.2.9\lib\net45\System.Web.Cors.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.2.0.15\lib\net45\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IdentityModel.Tokens.Jwt">
+      <HintPath>..\packages\System.IdentityModel.Tokens.Jwt.5.6.0\lib\net461\System.IdentityModel.Tokens.Jwt.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Tokens">
+      <HintPath>..\packages\Microsoft.IdentityModel.Tokens.5.6.0\lib\net461\Microsoft.IdentityModel.Tokens.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Logging">
+      <HintPath>..\packages\Microsoft.IdentityModel.Logging.5.6.0\lib\net461\Microsoft.IdentityModel.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.JsonWebTokens">
+      <HintPath>..\packages\Microsoft.IdentityModel.JsonWebTokens.5.6.0\lib\net461\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
+    <Reference Include="Swashbuckle.Core">
+      <HintPath>..\packages\Swashbuckle.Core.5.6.0\lib\net40\Swashbuckle.Core.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Global.asax" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Core App & Web API -->
+    <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="App_Start\SwaggerConfig.cs" />
+    <Compile Include="App_Start\DependencyConfig.cs" />
+    <Compile Include="Filters\ApiExceptionFilterAttribute.cs" />
+    <Compile Include="Security\JwtAuthorizeAttribute.cs" />
+    <Compile Include="Controllers\BaseApiController.cs" />
+    <Compile Include="Controllers\SwaggerRedirectController.cs" />
+    <Compile Include="Controllers\AuthController.cs" />
+    <Compile Include="Controllers\CryptocurrenciesController.cs" />
+    <Compile Include="Controllers\PortfolioController.cs" />
+    <Compile Include="Controllers\OrdersController.cs" />
+    <Compile Include="Controllers\TradesController.cs" />
+    <Compile Include="Controllers\TransactionsController.cs" />
+    <Compile Include="Controllers\DepositsController.cs" />
+    <Compile Include="Controllers\WithdrawalsController.cs" />
+    <Compile Include="Controllers\ProfileController.cs" />
+    <Compile Include="Controllers\PubSubWebhookController.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <!-- Business Services -->
+    <Compile Include="Business\Services\AuthService.cs" />
+    <Compile Include="Business\Services\CryptoService.cs" />
+    <Compile Include="Business\Services\FinancialService.cs" />
+    <Compile Include="Business\Services\OrderService.cs" />
+    <Compile Include="Business\Services\PortfolioService.cs" />
+    <Compile Include="Business\Services\TradingService.cs" />
+    <Compile Include="Business\Services\UserService.cs" />
+    <!-- Data Access -->
+    <Compile Include="Data\DbConnectionFactory.cs" />
+    <Compile Include="Data\Repositories\AccountRepository.cs" />
+    <Compile Include="Data\Repositories\CryptocurrencyRepository.cs" />
+    <Compile Include="Data\Repositories\FinancialRepositories.cs" />
+    <Compile Include="Data\Repositories\OrderRepository.cs" />
+    <Compile Include="Data\Repositories\PortfolioRepository.cs" />
+    <Compile Include="Data\Repositories\TradingRepository.cs" />
+    <Compile Include="Data\Repositories\UserRepository.cs" />
+    <Compile Include="Data\Repositories\WalletRepository.cs" />
+    <!-- Infrastructure -->
+    <Compile Include="Infrastructure\PubSub\PubSubConfig.cs" />
+    <Compile Include="Infrastructure\PubSub\PubSubEvents.cs" />
+    <Compile Include="Infrastructure\PubSub\PubSubMessageHub.cs" />
+    <Compile Include="Infrastructure\PubSub\IPubSubPublisher.cs" />
+    <Compile Include="Infrastructure\PubSub\PubSubPublisher.cs" />
+    <Compile Include="Infrastructure\PubSub\IPubSubSubscriber.cs" />
+    <Compile Include="Infrastructure\PubSub\PubSubSubscriber.cs" />
+    <Compile Include="Infrastructure\PubSub\IOrderExecutionProcessor.cs" />
+    <Compile Include="Infrastructure\PubSub\OrderExecutionProcessor.cs" />
+    <Compile Include="Infrastructure\PubSub\MarketTickHotCacheSubscriber.cs" />
+    <Compile Include="Infrastructure\PubSub\PubSubManager.cs" />
+    <Compile Include="Infrastructure\Logging\LoggerService.cs" />
+    <Compile Include="Infrastructure\MarketData\CoinGeckoMarketService.cs" />
+    <Compile Include="Infrastructure\Reports\PdfReportService.cs" />
+    <Compile Include="Infrastructure\Security\PasswordHasher.cs" />
+    <Compile Include="Infrastructure\Security\TokenService.cs" />
+    <!-- Models -->
+    <Compile Include="Models\DTOs\DTOs.cs" />
+    <Compile Include="Models\Entities\Entities.cs" />
+    <Compile Include="Models\Enums\OrderEnums.cs" />
+    <Compile Include="Models\Requests\Requests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -86,37 +180,24 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != '' And Exists('$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets')" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
   <ProjectExtensions>
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
+          <StartPageUrl>swagger</StartPageUrl>
+          <StartAction>SpecificPage</StartAction>
           <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <DevelopmentServerPort>60396</DevelopmentServerPort>
+          <DevelopmentServerPort>44341</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>https://localhost:44341/</IISUrl>
+          <IISUrl>http://localhost:44341/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
-          <CustomServerUrl>
-          </CustomServerUrl>
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
-  </Target>
 </Project>

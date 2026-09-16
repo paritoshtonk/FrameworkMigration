@@ -39,6 +39,8 @@ bld/
 !**/packages/repositories.config
 !**/packages/packages.config
 *.nupkg
+*.exe
+nuget.exe
 
 # Test results
 [Tt]est[Rr]esult*/
@@ -115,3 +117,41 @@ _ReSharper*/
 app.secrets.config
 connectionStrings.config
 
+# =============================================================================
+# Node.js & React Frontend (Crypto Trader React)
+# =============================================================================
+
+# Dependencies
+**/node_modules/
+**/.pnp
+**/.pnp.js
+
+# Production / Build Output
+**/build/
+**/dist/
+**/out/
+
+# Testing & Coverage
+**/coverage/
+
+# Environment files
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+
+# npm / yarn / pnpm debug logs
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+**/lerna-debug.log*
+
+# Caches & temporary files
+**/.eslintcache
+**/.cache/
+**/.parcel-cache/
+
+# OS generated files
+.DS_Store
+Thumbs.db

@@ -1,3 +1,6 @@
 <Solution>
-  <Project Path="Crypto Trading/Crypto Trading.csproj" />
+  <Project Path="Crypto Trading/Crypto Trading.csproj" Id="8e776c20-8603-4880-bd99-9219811836a2" />
+  <Folder Name="/tests/">
+    <Project Path="tests/CryptoTrading.Tests/CryptoTrading.Tests.csproj" />
+  </Folder>
 </Solution>

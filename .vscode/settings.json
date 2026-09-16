@@ -1,0 +1,6 @@
+{
+  "dotnet.defaultSolution": "Crypto Trading/Crypto Trading.sln",
+  "csharp.format.enable": true,
+  "dotnet.server.useOmnisharp": false
+}
+
