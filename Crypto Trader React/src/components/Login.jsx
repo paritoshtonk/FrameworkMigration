@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { api } from '../api/client';
 
-export default function Login({ onLoginSuccess, onSwitchToRegister }) {
+export default function Login({ onLoginSuccess, onSwitchToRegister, sessionExpiredMessage }) {
     const [usernameOrEmail, setUsernameOrEmail] = useState('demo_trader');
     const [password, setPassword] = useState('Password123!');
     const [loading, setLoading] = useState(false);
@@ -33,6 +33,12 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }) {
                 <p>Sign in to your simulated paper-trading account</p>
             </div>
 
+            {sessionExpiredMessage && (
+                <div className="alert alert-error" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                    <span>⚠️</span>
+                    <span>{sessionExpiredMessage}</span>
+                </div>
+            )}
             {error && <div className="alert alert-error">{error}</div>}
 
             <form onSubmit={handleSubmit} className="auth-form">

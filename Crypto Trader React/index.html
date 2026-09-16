@@ -18,6 +18,34 @@
         const REFRESH_INTERVAL_SECONDS = 20;
         const REFRESH_INTERVAL_MS = REFRESH_INTERVAL_SECONDS * 1000;
 
+        function parseJwt(token) {
+            if (!token || typeof token !== 'string') return null;
+            const parts = token.split('.');
+            if (parts.length !== 3) return null;
+            try {
+                const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                const pad = base64.length % 4;
+                const padded = pad ? base64 + '='.repeat(4 - pad) : base64;
+                const decoded = atob(padded);
+                const utf8 = decodeURIComponent(
+                    decoded.split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
+                );
+                return JSON.parse(utf8);
+            } catch {
+                try { return JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))); }
+                catch { return null; }
+            }
+        }
+
+        function isTokenExpired(token) {
+            if (!token) return true;
+            const payload = parseJwt(token);
+            if (!payload || !payload.exp) return false;
+            return payload.exp * 1000 <= Date.now();
+        }
+
+        let sessionExpiredListeners = [];
+
         const authStorage = {
             getToken: () => localStorage.getItem('crypto_trader_token'),
             setToken: (t) => localStorage.setItem('crypto_trader_token', t),
@@ -25,15 +53,50 @@
                 localStorage.removeItem('crypto_trader_token');
                 localStorage.removeItem('crypto_trader_user');
             },
-            getUser: () => {
-                try { return JSON.parse(localStorage.getItem('crypto_trader_user') || 'null'); }
-                catch { return null; }
+            logout: () => {
+                authStorage.clear();
             },
-            setUser: (u) => localStorage.setItem('crypto_trader_user', JSON.stringify(u))
+            getUser: () => {
+                try {
+                    const token = authStorage.getToken();
+                    if (!token || isTokenExpired(token)) {
+                        authStorage.clear();
+                        return null;
+                    }
+                    return JSON.parse(localStorage.getItem('crypto_trader_user') || 'null');
+                } catch {
+                    return null;
+                }
+            },
+            setUser: (u) => localStorage.setItem('crypto_trader_user', JSON.stringify(u)),
+            onSessionExpired: (listener) => {
+                sessionExpiredListeners.push(listener);
+                return () => {
+                    sessionExpiredListeners = sessionExpiredListeners.filter(l => l !== listener);
+                };
+            },
+            notifySessionExpired: (reason = 'expired') => {
+                authStorage.clear();
+                sessionExpiredListeners.forEach(l => {
+                    try { l(reason); } catch (e) { console.error(e); }
+                });
+                window.dispatchEvent(new CustomEvent('crypto_trader:session_expired', { detail: { reason } }));
+            }
         };
 
         async function apiCall(path, method = 'GET', body = null) {
             const token = authStorage.getToken();
+            const isAuthEndpoint = path.startsWith('/auth/login') || path.startsWith('/auth/register');
+
+            if (token) {
+                if (!isAuthEndpoint && isTokenExpired(token)) {
+                    authStorage.notifySessionExpired('expired');
+                    const err = new Error('Your session has expired. Please sign in again.');
+                    err.status = 401;
+                    throw err;
+                }
+            }
+
             const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
             if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -43,6 +106,17 @@
                 headers,
                 body: body ? JSON.stringify(body) : null
             });
+
+            if (res.status === 401 && !isAuthEndpoint) {
+                authStorage.notifySessionExpired('unauthorized');
+                let errJson = null;
+                try { errJson = await res.json(); } catch {}
+                const msg = errJson?.message || 'Your session has expired. Please sign in again.';
+                const err = new Error(msg);
+                err.status = 401;
+                throw err;
+            }
+
             const json = await res.json();
             if (!res.ok || !json.success) {
                 throw new Error(json.message || `API call failed: ${res.status}`);
@@ -56,10 +130,8 @@
             return isNaN(n) ? fallback : n;
         }
 
-        function fmtMoney(val, min = 2, max = 2) {
         function fmtMoney(val, minDec = 2, maxDec = undefined) {
             const n = safeNum(val);
-            return n.toLocaleString('en-US', { minimumFractionDigits: min, maximumFractionDigits: max });
             let min = typeof minDec === 'number' && !isNaN(minDec) ? Math.max(0, Math.min(20, Math.floor(minDec))) : 2;
             let max = typeof maxDec === 'number' && !isNaN(maxDec) ? Math.max(0, Math.min(20, Math.floor(maxDec))) : Math.max(min, 2);
             if (max < min) max = min;
@@ -72,9 +144,17 @@
 
         async function downloadPnLReport(timeframe = '30d') {
             const token = authStorage.getToken();
+            if (token && isTokenExpired(token)) {
+                authStorage.notifySessionExpired('expired');
+                throw new Error('Your session has expired. Please sign in again.');
+            }
             const res = await fetch(`${API_BASE}/portfolio/reports/pnl-settlement?timeframe=${encodeURIComponent(timeframe)}`, {
                 headers: token ? { 'Authorization': `Bearer ${token}` } : {}
             });
+            if (res.status === 401) {
+                authStorage.notifySessionExpired('unauthorized');
+                throw new Error('Your session has expired. Please sign in again.');
+            }
             if (!res.ok) throw new Error(`Report generation failed (${res.status})`);
             const blob = await res.blob();
             const blobUrl = window.URL.createObjectURL(blob);
@@ -90,6 +170,7 @@
         function App() {
             const [user, setUser] = React.useState(() => authStorage.getUser());
             const [authMode, setAuthMode] = React.useState('login');
+            const [sessionExpiredMsg, setSessionExpiredMsg] = React.useState('');
             const [activeTab, setActiveTab] = React.useState('dashboard');
             const [selectedSymbol, setSelectedSymbol] = React.useState('BTC');
             const [portfolio, setPortfolio] = React.useState(null);
@@ -171,16 +252,49 @@
             };
 
             const handleLogin = (u) => {
+                setSessionExpiredMsg('');
                 setUser(u);
                 setActiveTab('dashboard');
             };
 
-            const handleLogout = () => {
+            const handleLogout = React.useCallback((reason = null) => {
                 authStorage.clear();
                 setUser(null);
                 setPortfolio(null);
                 setAuthMode('login');
-            };
+                if (reason) {
+                    setSessionExpiredMsg('Your session has expired. Please sign in again.');
+                } else {
+                    setSessionExpiredMsg('');
+                }
+            }, []);
+
+            React.useEffect(() => {
+                const unsubscribe = authStorage.onSessionExpired((reason) => {
+                    handleLogout(reason || 'expired');
+                });
+                const handleCustomEvent = (e) => {
+                    handleLogout(e?.detail?.reason || 'expired');
+                };
+                window.addEventListener('crypto_trader:session_expired', handleCustomEvent);
+                return () => {
+                    if (unsubscribe) unsubscribe();
+                    window.removeEventListener('crypto_trader:session_expired', handleCustomEvent);
+                };
+            }, [handleLogout]);
+
+            React.useEffect(() => {
+                if (!user) return;
+                const checkExpiry = () => {
+                    const token = authStorage.getToken();
+                    if (!token || isTokenExpired(token)) {
+                        handleLogout('expired');
+                    }
+                };
+                checkExpiry();
+                const interval = setInterval(checkExpiry, 5000);
+                return () => clearInterval(interval);
+            }, [user, handleLogout]);
 
             if (!user) {
                 return (
@@ -192,9 +306,22 @@
                                 <span className="badge-legacy">SEPARATE REACT PROJECT</span>
                             </div>
                             {authMode === 'login' ? (
-                                <LoginView onLogin={handleLogin} onSwitch={() => setAuthMode('register')} />
+                                <LoginView
+                                    onLogin={handleLogin}
+                                    onSwitch={() => {
+                                        setSessionExpiredMsg('');
+                                        setAuthMode('register');
+                                    }}
+                                    sessionExpiredMessage={sessionExpiredMsg}
+                                />
                             ) : (
-                                <RegisterView onRegister={handleLogin} onSwitch={() => setAuthMode('login')} />
+                                <RegisterView
+                                    onRegister={handleLogin}
+                                    onSwitch={() => {
+                                        setSessionExpiredMsg('');
+                                        setAuthMode('login');
+                                    }}
+                                />
                             )}
                         </div>
                     </div>
@@ -252,7 +379,7 @@
             );
         }
 
-        function LoginView({ onLogin, onSwitch }) {
+        function LoginView({ onLogin, onSwitch, sessionExpiredMessage }) {
             const [loginField, setLoginField] = React.useState('demo_trader');
             const [password, setPassword] = React.useState('Password123!');
             const [err, setErr] = React.useState('');
@@ -280,6 +407,12 @@
                         <h2>Welcome Back</h2>
                         <p>Sign in to your paper-trading account</p>
                     </div>
+                    {sessionExpiredMessage && (
+                        <div className="alert alert-error" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                            <span>⚠️</span>
+                            <span>{sessionExpiredMessage}</span>
+                        </div>
+                    )}
                     {err && <div className="alert alert-error">{err}</div>}
                     <form onSubmit={submit} className="auth-form">
                         <div className="form-group">

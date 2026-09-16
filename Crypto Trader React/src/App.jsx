@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { api, authStorage } from './api/client';
+import { api, authStorage, isTokenExpired } from './api/client';
 import Navbar from './components/Navbar';
 import Login from './components/Login';
 import Register from './components/Register';
@@ -16,6 +16,7 @@ import { REFRESH_INTERVAL_SECONDS, REFRESH_INTERVAL_MS } from './config';
 export default function App() {
     const [user, setUser] = useState(() => authStorage.getUser());
     const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
+    const [sessionExpiredMsg, setSessionExpiredMsg] = useState('');
     const [activeTab, setActiveTab] = useState('dashboard');
     const [selectedSymbol, setSelectedSymbol] = useState('BTC');
     const [cryptos, setCryptos] = useState([]);
@@ -97,16 +98,51 @@ export default function App() {
     };
 
     const handleLoginSuccess = (loggedInUser) => {
+        setSessionExpiredMsg('');
         setUser(loggedInUser);
         setActiveTab('dashboard');
     };
 
-    const handleLogout = () => {
+    const handleLogout = useCallback((reason = null) => {
         authStorage.logout();
         setUser(null);
         setPortfolio(null);
         setAuthMode('login');
-    };
+        if (reason) {
+            setSessionExpiredMsg('Your session has expired. Please sign in again.');
+        } else {
+            setSessionExpiredMsg('');
+        }
+    }, []);
+
+    // Listen for session expiration events (from 401s or proactive checks in client.js)
+    useEffect(() => {
+        const unsubscribe = authStorage.onSessionExpired((reason) => {
+            handleLogout(reason || 'expired');
+        });
+        const handleCustomEvent = (e) => {
+            handleLogout(e?.detail?.reason || 'expired');
+        };
+        window.addEventListener('crypto_trader:session_expired', handleCustomEvent);
+        return () => {
+            if (unsubscribe) unsubscribe();
+            window.removeEventListener('crypto_trader:session_expired', handleCustomEvent);
+        };
+    }, [handleLogout]);
+
+    // Periodically verify token expiration while user is logged in
+    useEffect(() => {
+        if (!user) return;
+        const checkExpiry = () => {
+            const token = authStorage.getToken();
+            if (!token || isTokenExpired(token)) {
+                handleLogout('expired');
+            }
+        };
+        checkExpiry();
+        const interval = setInterval(checkExpiry, 5000);
+        return () => clearInterval(interval);
+    }, [user, handleLogout]);
 
     if (!user) {
         return (
@@ -121,12 +157,19 @@ export default function App() {
                     {authMode === 'login' ? (
                         <Login
                             onLoginSuccess={handleLoginSuccess}
-                            onSwitchToRegister={() => setAuthMode('register')}
+                            onSwitchToRegister={() => {
+                                setSessionExpiredMsg('');
+                                setAuthMode('register');
+                            }}
+                            sessionExpiredMessage={sessionExpiredMsg}
                         />
                     ) : (
                         <Register
                             onRegisterSuccess={handleLoginSuccess}
-                            onSwitchToLogin={() => setAuthMode('login')}
+                            onSwitchToLogin={() => {
+                                setSessionExpiredMsg('');
+                                setAuthMode('login');
+                            }}
                         />
                     )}
                 </div>
